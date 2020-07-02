@@ -10,6 +10,7 @@ Todo list: https://github.com/renlok/WeBid/wiki/To-DO
 ```
 git clone https://github.com/crazafimahatratra/WeBid.git
 cd WeBid
+mv _install/ install/
 sudo chown www cache/
 sudo chown www uploaded/
 sudo chown www uploaded/cache/
