@@ -67,7 +67,7 @@ class email_handler
             }
             $i++;
         }
-        $this->message = implode($skipped_buffer, '');
+        $this->message = implode('', $skipped_buffer);
         $this->message = str_replace("'", "\'", $this->message);
 
         $this->message = preg_replace('#\{([a-z0-9\-_]*?)\}#is', "' . ((isset(\$this->vars['\\1'])) ? \$this->vars['\\1'] : '') . '", $this->message);
@@ -454,11 +454,9 @@ class email_handler
                 $mail->CharSet = $CHARSET;
                 $mail->send();
             } catch (phpmailerException $e) {
-                var_dump($e);die;
                 //trigger_error('---->PHPMailer error: ' . $e->errorMessage());
                 $this->add_error($e->errorMessage());
             } catch (Exception $e) {
-                var_dump($e);die;
                 //trigger_error('---->PHPMailer error: ' . $e->getMessage());
                 $this->add_error($e->getMessage());
             }
