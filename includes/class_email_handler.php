@@ -454,11 +454,11 @@ class email_handler
                 $mail->CharSet = $CHARSET;
                 $mail->send();
             } catch (phpmailerException $e) {
-                //trigger_error('---->PHPMailer error: ' . $e->errorMessage());
-                $this->add_error($e->errorMessage());
+                trigger_error('---->PHPMailer error: ' . $e->errorMessage());
+                //$this->add_error($e->errorMessage());
             } catch (Exception $e) {
-                //trigger_error('---->PHPMailer error: ' . $e->getMessage());
-                $this->add_error($e->getMessage());
+                trigger_error('---->PHPMailer error: ' . $e->getMessage());
+                //$this->add_error($e->getMessage());
             }
         }
         return implode('<br/>', $this->errors);
