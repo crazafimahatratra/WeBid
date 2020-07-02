@@ -1,4 +1,5 @@
 <?php
+
 /***************************************************************************
  *   copyright				: (C) 2008 - 2017 WeBid
  *   site					: http://www.webidsupport.com/
@@ -57,7 +58,7 @@ class DatabasePDO extends Database
         }
     }
 
-    // put together the query ready for running
+    // put together the quert ready for running
     /*
     $query must be given like SELECT * FROM table WHERE this = :that AND where = :here
     then $params would holds the values for :that and :here, $table would hold the vlue for :table
@@ -67,10 +68,11 @@ class DatabasePDO extends Database
     );
     last value can be left blank more info http://php.net/manual/en/pdostatement.bindparam.php
     */
-    public function query($query, $params = array())
+    public function query($rawQuery, $params = array())
     {
         try {
             //$query = $this->build_query($query, $table);
+            $query = $this->quote_fields($rawQuery);
             $params = $this->build_params($params);
             $params = $this->clean_params($query, $params);
             $this->lastquery = $this->conn->prepare($query);
@@ -82,13 +84,55 @@ class DatabasePDO extends Database
             //$this->lastquery->debugDumpParams();
         } catch (PDOException $e) {
             //$this->lastquery->debugDumpParams();
+            echo "<pre>";
+            var_dump($e);
+            die;
             $this->error_handler($e->getMessage());
         }
 
         //$this->lastquery->rowCount(); // rows affected
     }
 
-    // put together the query ready for running
+    private function quote_fields($query)
+    {
+        $trimed = trim($query);
+        if (strpos(strtolower($trimed), "insert") === 0) return $this->quote_insert_fields($query);
+        if (strpos(strtolower($trimed), "update") === 0) return $this->quote_update_fields($query);
+        return $query;
+    }
+
+    private function quote_insert_fields($query)
+    {
+        $splited = preg_split("/values/i", $query);
+        if (count($splited) <= 1) return $query;
+        $values = preg_split("/[()]/", $splited[0]);
+        if (count($values) <= 1) return $query;
+        $fields = array_map(function ($field) {
+            $trimed = trim($field);
+            if(strpos($trimed, '`') !== false) return $trimed;
+            return "`{$trimed}`";
+        }, explode(",", $values[1]));
+        $gluedFields = implode(",", $fields);
+        $quoted = "{$values[0]} ({$gluedFields}) VALUES $splited[1]";
+        return $quoted;
+    }
+
+    private function quote_update_fields($query)
+    {
+        $parts = preg_split("/set/i", trim($query));
+        $splited = preg_split("/,/", $parts[1]);
+        $quoted = array_map(function ($elt) {
+            $s = preg_split("/=/", $elt);
+            if (count($s) != 2) return $elt;
+            $trimed = trim($s[0]);
+            if(strpos($trimed, '`') !== false) return "{$trimed}" . "=" . trim($s[1]);
+            return "`{$trimed}`" . "=" . trim($s[1]);
+        }, $splited);
+        $res = trim($parts[0]) . " SET " . implode(", ", $quoted);
+        return $res;
+    }
+
+    // put together the quert ready for running
     public function fetch($result = null, $method = 'FETCH_ASSOC')
     {
         try {
@@ -108,10 +152,9 @@ class DatabasePDO extends Database
         } catch (PDOException $e) {
             $this->error_handler($e->getMessage());
         }
-        return null;
     }
 
-    // put together the query ready for running + get all results
+    // put together the quert ready for running + get all results
     public function fetchall($result = null, $method = 'FETCH_ASSOC')
     {
         try {
@@ -194,7 +237,7 @@ class DatabasePDO extends Database
             //'bool' => PDO::PARAM_BOOL, doesn't work, php bug
             'bool' => PDO::PARAM_INT,
             'float' => PDO::PARAM_STR
-            );
+        );
         // set PDO values to params
         for ($i = 0; $i < count($params); $i++) {
             // force float
@@ -212,8 +255,8 @@ class DatabasePDO extends Database
 
     protected function error_handler($error)
     {
-        trigger_error($error, E_USER_WARNING);
         if (!$this->error_supress) {
+            trigger_error($error, E_USER_WARNING);
             debug_print_backtrace();
         }
     }
