@@ -54,6 +54,11 @@
 <!-- ENDIF -->
 					</td>
 				</tr>
+				<tr>
+					<td colspan="2" align="center">
+						<a href="../" style="text-decoration: none; color: #468dda; font-size: 12">Go to main site</a>
+					</td>
+				</tr>
 			</table>
 		</form>
 	</div>
