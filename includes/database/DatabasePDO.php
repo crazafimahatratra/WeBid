@@ -119,7 +119,7 @@ class DatabasePDO extends Database
 
     private function quote_update_fields($query)
     {
-        $parts = preg_split("/set/i", trim($query));
+        $parts = preg_split("/\sset\s/i", trim($query));
         $splited = preg_split("/,/", $parts[1]);
         $quoted = array_map(function ($elt) {
             $s = preg_split("/=/", $elt);
