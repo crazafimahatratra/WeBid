@@ -84,9 +84,6 @@ class DatabasePDO extends Database
             //$this->lastquery->debugDumpParams();
         } catch (PDOException $e) {
             //$this->lastquery->debugDumpParams();
-            echo "<pre>";
-            var_dump($e);
-            die;
             $this->error_handler($e->getMessage());
         }
 
